@@ -6,7 +6,7 @@ namespace WebApplication2.DTOs
     public class GetBookDto
     {
         public int Id { get; set; }
-        public CoverType Cover { get; set; }
+        public string CoverType { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public int PublishYear { get; set; }
@@ -17,7 +17,7 @@ namespace WebApplication2.DTOs
         public GetBookDto(Book book)
         {
             Id = book.Id;
-            Cover = book.Cover;
+            CoverType = book.Cover.ToString();
             Title = book.Title;
             Author = book.Author;
             PublishYear = book.PublishYear;
