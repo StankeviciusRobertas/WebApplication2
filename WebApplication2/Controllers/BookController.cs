@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using WebApplication2.Models;
-using WebApplication2.NewFolder;
+using WebApplication2.FakeDatabase;
+using WebApplication2.DTOs;
+using WebApplication2.DataLayer.Repositories;
 
 namespace WebApplication2.Controllers
 {
@@ -10,51 +12,91 @@ namespace WebApplication2.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        [HttpGet("/api/mybooks/list")]
-        public IEnumerable<Book> GetAll()
+        private readonly IBooksRepository _booksRepository;
+        
+        public BookController(IBooksRepository repository)
         {
-            var database = new BookDataBase();
-            var data = database.GetAll().Take(10);
-            return data;
+            _booksRepository = repository;
         }
 
-        [HttpGet("/api/mybooks/single/{id}")]
-        public Book GetSingleBook(int id)
+        [HttpGet]
+        public IEnumerable<GetBookDto> GetAll()
         {
-            var database = new BookDataBase();
-            var data = database.GetAll().Find(b => b.Id == id);
-            return data;
+            var data = _booksRepository.GetAll();
+            return data.Select(t => new GetBookDto(t));
         }
 
-        [HttpGet("/api/mybooks/pagedlist/{pageNum}")]
-        public IEnumerable<Book> GetPagedList(int pageNum)
+        [HttpGet("{id}")]
+        public GetBookDto GetSingleBook(int id)
         {
-            var database = new BookDataBase();
-            var pageSize = 10;
+            var data = _booksRepository.GetById(id);
+            return new GetBookDto(data);
+        }
 
-            if (pageNum == 1)
+        [HttpGet("exists/{id}")]
+        public IActionResult BookExists(int id)
+        {
+            var bookInfo = _booksRepository.BookExists(id);
+
+            if (bookInfo != null)
             {
-                var data = database.GetAll().Take(pageSize);
-                return data;
-            }
-            else if (pageNum == 2)
-            {
-                var data = database.GetAll().Skip(pageSize).Take(pageSize);
-                return data;
+                return Ok(bookInfo);
             }
             else
             {
-                return Enumerable.Empty<Book>();
+                return NotFound($"Book with Id {id} not found");
             }
         }
 
-        [HttpGet("/api/mybooks/sortedlist")]
-        public IEnumerable<Book> GetSortedBookList()
+        //[HttpGet("pagedlist/{pageNum}/{pageSize}")]
+        //public IEnumerable<Book> GetPagedList(int pageNum, int pageSize)
+        //{
+        //    var database = new BookDataBase();
+
+        //    var data = database.GetAll().Skip((pageNum - 1) * pageSize).Take(pageSize);
+        //    return data;
+        //}
+
+        //[HttpGet("sortedlist")]
+        //public IEnumerable<Book> GetSortedBookList()
+        //{
+        //    var database = new BookDataBase();
+        //    var data = database.GetAll().OrderBy(b => b.Title);
+        //    return data;
+        //}
+
+        /// <summary>
+        /// Iraso nauja Book irasa i duomenu baze
+        /// </summary>
+        /// <param name="book">Book objektas</param>
+        [HttpPost]
+        public void CreateBook(CreateBookDto book)
         {
-            var database = new BookDataBase();
-            var data = database.GetAll().OrderBy(b => b.Title);
-            return data;
+            Book model = CreateBookDto.ToModel(book);
+            //return _booksRepository.InsertBook(model);
         }
+
+        //TODO
+        [HttpPut("{id}")]
+        public void UpdateBook(UpdateBookDto book)
+        {
+            _booksRepository.UpdateBook(book);
+        }
+
+        [HttpDelete]
+        public void DeleteBook(int id)
+        {
+            _booksRepository.DeleteBook(id);
+        }
+
+        //[HttpPut("updateTitle")]
+        //public void UpdateBookTitle(BookWithTitle book)
+        //{
+        //    var database = new BookDataBase();
+        //    database.UpdateTitle(book.Id, book.Title);
+        //}
+
+
 
     }
 }

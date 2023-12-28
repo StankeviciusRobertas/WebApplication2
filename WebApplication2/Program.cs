@@ -1,3 +1,6 @@
+using WebApplication2.DataLayer.Repositories;
+using WebApplication2.Services;
+
 namespace WebApplication2
 {
     public class Program
@@ -7,6 +10,9 @@ namespace WebApplication2
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddTransient<ITodoRepository, TodoRepository>(); // uzsregistravome servisa i Dependnecy injection konteineri
+            builder.Services.AddTransient<IToDoEmailService, ToDoEmailService>();
+            builder.Services.AddTransient<IBooksRepository, BooksRepository>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

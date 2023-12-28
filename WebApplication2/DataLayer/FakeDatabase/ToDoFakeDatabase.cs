@@ -1,6 +1,6 @@
 ﻿using WebApplication2.Models;
 
-namespace WebApplication2.NewFolder
+namespace WebApplication2.FakeDatabase
 {
     public class ToDoFakeDatabase
     {
@@ -26,6 +26,32 @@ namespace WebApplication2.NewFolder
         public List<TodoItem> GetAll()
         {
             return todoList;
+        }
+
+        public void InsertToDo(TodoItem todoItem)
+        {
+            todoList.Add(todoItem);
+        }
+
+        public void UpdateToDo(TodoItem todoItem)
+        {
+            var todoItemToUpdate = todoList.FirstOrDefault(t => t.Id == todoItem.Id);
+
+            if (todoItemToUpdate == null)
+            {
+                throw new ArgumentException($"Book with ID {todoItem.Id} was not found in database");
+            }
+
+            todoItemToUpdate.Type = todoItem.Type;
+            todoItemToUpdate.Content = todoItem.Content;
+            todoItemToUpdate.EndDate = todoItem.EndDate;
+            todoItemToUpdate.UserId = todoItem.UserId;
+        }
+
+        public void DeleteToDo(int id)
+        {
+            var todoItemToUpdate = todoList.FirstOrDefault(t => t.Id == id);
+            todoList.Remove(todoItemToUpdate);
         }
     }
 }
